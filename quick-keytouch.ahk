@@ -1,7 +1,16 @@
-#SingleInstance, Force
+﻿#SingleInstance, Force
 #InstallKeybdHook
+#MaxHotkeysPerInterval 200
 SendMode Input
 SetWorkingDir, %A_ScriptDir%
+
+numpadMode := false
+
+;緊急復帰用（フックを使わない登録方式なのでフックが外れても効く）
+^!r::
+    Send, {Blind}{Shift Up}{Ctrl Up}{Alt Up}{LWin Up}{RWin Up}
+    Reload
+return
 
 ;方向キー
 ; vk1D & j::send leftじゃなくてvk1D & j::leftにしたらifいらんかも
@@ -118,17 +127,16 @@ vk1D & o::send, {vkF3sc029}
 
 
 ;テンキー
-F13::Return
-
+;F13を押しっぱなしにする方式だと、ロック画面やUACを挟むと押下状態がずれて
+;テンキーモードが外れなくなるので、スクリプト内の変数で管理する
 vkF0::
-    if(getkeystate("F13")){
-        send, {Blind}{F13 Up}
-    }else{
-        send, {Blind}{F13 Down}
-    }
+    ;押しっぱなしのキーリピートで何度も切り替わるのを防ぐ
+    if (A_PriorHotkey = A_ThisHotkey and A_TimeSincePriorHotkey < 150)
+        return
+    numpadMode := !numpadMode
 return
 
-#If GetKeyState("F13")
+#If numpadMode
     $7::send, {Asc 55} ;7
     $8::send, {Asc 56} ;8
     $+8::send, {Asc 40} ;(
@@ -189,11 +197,9 @@ vk1D & [::send,{Delete}
 ;shift大文字
 vk1C::shift
 
-;&を入力
-~vk1C & t::
-    if getkeystate("shift","P"){
-        send, {&}
-    }else{
-        send, {T}
-    }
-return
+;&を入力（変換+Shift+t）
+;vk1Cをリマップと「vk1C & t」のプレフィックスに二重で使うとShiftが押しっぱなしになることがあるので、
+;プレフィックスにはせず物理キーの状態で判定する
+#If (getkeystate("vk1C", "P") and getkeystate("Shift", "P"))
+    +t::send, {&}
+#If
