@@ -4,7 +4,14 @@ AutoHotkey を使って、ホームポジションから手をあまり動かさ
 
 - 対象: Windows ＋ 日本語（JIS）配列キーボード（無変換・変換キーを使う）
 - 動作環境: AutoHotkey **v1.1**（v1.1.37.01 で確認。v2 では動かない）
-- 本体: `quick-keytouch.ahk`
+
+## ファイル構成
+
+| ファイル | 内容 |
+| --- | --- |
+| `quick-keytouch.ahk` | 本体のスクリプト |
+| `setup-startup.ps1` | ログオン時に自動で起動するよう登録・解除するスクリプト |
+| `README.md` | この説明。「操作方法」の表はショートカット一覧の表示にも使う |
 
 ## セットアップ
 
@@ -57,17 +64,20 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 ## 操作方法
 
 基本は **無変換キー** を押しながら別のキーを押す。
+ここの表は、機能メニューの「ショートカット一覧」にもそのまま表示される。
 
 ### カーソル移動・選択
 
 | キー | 動作 |
 | --- | --- |
 | 無変換 ＋ `i` / `k` / `j` / `l` | ↑ / ↓ / ← / → |
-| 上の操作 ＋ Shift / Ctrl / Shift+Ctrl | Shift+矢印（選択）/ Ctrl+矢印（単語移動）/ Shift+Ctrl+矢印 |
-| 無変換 ＋ `;` | Home（Shift を足すと Shift+Home） |
-| 無変換 ＋ `:` | End（Shift を足すと Shift+End） |
-| 無変換 ＋ `.` | PageUp |
-| 無変換 ＋ `/` | PageDown |
+| 無変換 ＋ Shift ＋ `i` / `k` / `j` / `l` | Shift+矢印（選択） |
+| 無変換 ＋ Ctrl ＋ `i` / `k` / `j` / `l` | Ctrl+矢印（単語単位で移動） |
+| 無変換 ＋ Shift ＋ Ctrl ＋ `i` / `k` / `j` / `l` | Shift+Ctrl+矢印（単語単位で選択） |
+| 無変換 ＋ `;` | Home（Shift で選択、Ctrl で文書の先頭へ） |
+| 無変換 ＋ `:` | End（Shift で選択、Ctrl で文書の末尾へ） |
+| 無変換 ＋ `.` | PageUp（Shift で選択、Ctrl で前のタブへ） |
+| 無変換 ＋ `/` | PageDown（Shift で選択、Ctrl で次のタブへ） |
 | Alt ＋ `i` / `k` | Alt+↑ / Alt+↓（Shift・Ctrl を足した組み合わせも可。VS Code の行移動など） |
 
 ### 編集
@@ -75,8 +85,8 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 | キー | 動作 |
 | --- | --- |
 | 無変換 ＋ `m` | Enter（Shift / Ctrl / Shift+Ctrl を足した組み合わせも可） |
-| 無変換 ＋ `p` | Backspace |
-| 無変換 ＋ `[` | Delete |
+| 無変換 ＋ `p` | Backspace（Ctrl を足すと単語ごと削除） |
+| 無変換 ＋ `[` | Delete（Ctrl を足すと単語ごと削除） |
 | 無変換 ＋ `@` | Insert |
 | 無変換 ＋ `e` | Esc |
 | 無変換 ＋ `a` | すべて選択（Ctrl+A） |
@@ -85,8 +95,10 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 | 無変換 ＋ `,` | 貼り付け（Ctrl+V） |
 | 無変換 ＋ `u` | 元に戻す（Ctrl+Z） |
 | 無変換 ＋ `y` | やり直し（Ctrl+Y） |
+| 無変換 ＋ `f` | 検索（Ctrl+F） |
+| 無変換 ＋ `w` | タブ・ファイルを閉じる（Ctrl+W） |
 | 無変換 ＋ `s` | 保存（Ctrl+S） |
-| 無変換 ＋ `h` | 実行（F5） |
+| 無変換 ＋ `h` | 実行（F5。Shift / Ctrl / Shift+Ctrl を足した組み合わせも可） |
 | 無変換 ＋ `o` | 半角/全角の切り替え |
 
 ### 記号
@@ -102,16 +114,22 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 | --- | --- |
 | 変換 | Shift として働く |
 
-### 仮想デスクトップ
+### ウィンドウ・デスクトップ
 
 | キー | 動作 |
 | --- | --- |
-| 左Shift ＋ 右Shift ＋ `a` | 左のデスクトップへ（Win+Ctrl+←） |
-| 左Shift ＋ 右Shift ＋ `d` | 右のデスクトップへ（Win+Ctrl+→） |
+| Win ＋ 無変換 ＋ `i` / `k` / `j` / `l` | Win+↑ / ↓ / ← / →（ウィンドウの最大化・最小化・左右寄せ。Shift を足すと別のモニターへ移動） |
+| 左Shift ＋ 右Shift ＋ `a` | 左の仮想デスクトップへ（Win+Ctrl+←） |
+| 左Shift ＋ 右Shift ＋ `d` | 右の仮想デスクトップへ（Win+Ctrl+→） |
+| Win ＋ `L` | ロック（Windows の代わりにスクリプトがロックする。下の「補足」を参照） |
 
 ### テンキーモード
 
-**英数（CapsLock）キー**を押すたびにオン・オフが切り替わる。オンの間は次のように入力される。
+| キー | 動作 |
+| --- | --- |
+| 英数（CapsLock） | テンキーモードのオン・オフを切り替える（オンの間はマウスの横に「テンキー」と表示） |
+
+オンの間は、次のように入力される。
 
 | キー | 入力 | キー | 入力 | キー | 入力 |
 | --- | --- | --- | --- | --- | --- |
@@ -123,11 +141,44 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 
 `, - . / ^ [ ]` や Shift を足した `( ) < = > ~` は、そのままの文字が入力される。
 
+### 機能メニュー
+
+| キー | 動作 |
+| --- | --- |
+| 無変換 ＋ 英数（CapsLock） | 機能メニューを開く |
+| メニューで `a` | メモ帳 |
+| メニューで `s` | 電卓 |
+| メニューで `d` | ターミナル |
+| メニューで `f` | ショートカット一覧（この表を一覧で表示する。Esc で閉じる） |
+
 ### 困ったとき
 
 | キー | 動作 |
 | --- | --- |
 | Ctrl ＋ Alt ＋ `R` | Shift・Ctrl・Alt・Win を離してからスクリプトを再読み込みする |
 
-ショートカットが急に効かなくなったときに使う（キーの押しっぱなし状態がずれたときや、負荷が高くて Windows にキー監視を外されたとき）。
+## 補足
+
+### ショートカットが急に効かなくなったとき
+
+Ctrl ＋ Alt ＋ `R` で再読み込みする。キーの押しっぱなし状態がずれたときや、負荷が高くて Windows にキー監視を外されたときに効く。
 このキーは、キー監視が外れていても効く方法で登録してある。
+
+### 機能メニューのアプリ
+
+メモ帳・電卓・ターミナルは、すでに開いていれば新しく開かずにそのウィンドウを前面に出す。
+スクリプトを管理者で動かしていても、アプリは通常権限で起動する。
+
+### Win+L（ロック）
+
+Win+L は Windows が直接処理するため、そのままでは Win ＋ 無変換 ＋ `l` を押すとロックがかかってしまう。
+そこでスクリプトの起動中は、レジストリ（`HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System` の `DisableLockWorkstation`）で Windows 側の Win+L を無効にし、代わりにスクリプトが Win+L でロックする。普段どおり Win+L でロックできる。
+
+- スクリプトを普通に終了・再読み込みしたときは、自動で元に戻る
+- タスクマネージャーなどで強制終了すると元に戻らず、Win+L と Ctrl+Alt+Del の「ロック」が使えないままになる。スクリプトを起動し直せば Win+L は使えるようになり、終了すれば元に戻る
+- 起動中は Ctrl+Alt+Del の画面に「ロック」が表示されない
+
+### ショートカットを変更したとき
+
+`quick-keytouch.ahk` を変更したら、この README の「操作方法」の表も合わせて更新する。
+ショートカット一覧はこの表を読み込んで表示しているので、表を更新すれば一覧にも反映される。
