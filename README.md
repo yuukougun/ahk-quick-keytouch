@@ -80,7 +80,7 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 | 無変換 ＋ `:` | End（Shift で選択、Ctrl で文書の末尾へ） |
 | 無変換 ＋ `.` | PageUp（Shift で選択、Ctrl で前のタブへ） |
 | 無変換 ＋ `/` | PageDown（Shift で選択、Ctrl で次のタブへ） |
-| Alt ＋ `i` / `k` | Alt+↑ / Alt+↓（Shift・Ctrl を足した組み合わせも可。VS Code の行移動など） |
+| Alt ＋ `i` / `k` / `j` / `l` | Alt+↑ / ↓ / ← / →（Shift・Ctrl を足した組み合わせも可。VS Code の行移動、ブラウザーの戻る・進むなど） |
 
 ### 編集
 
@@ -98,7 +98,6 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 | 無変換 ＋ `u` | 元に戻す（Ctrl+Z） |
 | 無変換 ＋ `y` | やり直し（Ctrl+Y） |
 | 無変換 ＋ `f` | 検索（Ctrl+F） |
-| 無変換 ＋ `w` | タブ・ファイルを閉じる（Ctrl+W） |
 | 無変換 ＋ `s` | 保存（Ctrl+S） |
 | 無変換 ＋ `h` | 実行（F5。Shift / Ctrl / Shift+Ctrl を足した組み合わせも可） |
 | 無変換 ＋ `o` | 半角/全角の切り替え |
@@ -120,6 +119,7 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 
 | キー | 動作 |
 | --- | --- |
+| 無変換 ＋ Tab | Alt+Tab（無変換を押したまま Tab を押すたびに次のウィンドウへ。無変換を離すと切り替わる） |
 | Win ＋ 無変換 ＋ `i` / `k` / `j` / `l` | Win+↑ / ↓ / ← / →（ウィンドウの最大化・最小化・左右寄せ。Shift を足すと別のモニターへ移動） |
 | 左Shift ＋ 右Shift ＋ `a` | 左の仮想デスクトップへ（Win+Ctrl+←） |
 | 左Shift ＋ 右Shift ＋ `d` | 右の仮想デスクトップへ（Win+Ctrl+→） |
@@ -150,7 +150,8 @@ powershell -ExecutionPolicy Bypass -File .\setup-startup.ps1 -Uninstall
 | 無変換 ＋ 英数（CapsLock） | 機能メニューを開く |
 | メニューで `a` | メモ帳 |
 | メニューで `s` | 電卓 |
-| メニューで `d` | ターミナル |
+| メニューで `d` | ターミナル（cmd。Windows Terminal の「コマンド プロンプト」プロファイルで開く） |
+| メニューで `v` | VS Code の新しいウィンドウ |
 | メニューで `f` | ショートカット一覧（この表を一覧で表示する。Esc で閉じる） |
 
 ### 困ったとき
@@ -176,8 +177,10 @@ CPU が混んでいると、Windows がキー監視（キーボードの低レ�
 
 ### 機能メニューのアプリ
 
-メモ帳・電卓・ターミナルは、すでに開いていれば新しく開かずにそのウィンドウを前面に出す。
-スクリプトを管理者で動かしていても、アプリは通常権限で起動する。
+メモ帳・電卓・ターミナル（cmd）は、すでに開いていれば新しく開かずにそのウィンドウを前面に出す。
+ターミナルは、タイトルが「コマンド プロンプト」の Windows Terminal のウィンドウ（cmd のタブを表示しているもの）があればそれを前面に出す。PowerShell のタブを表示しているウィンドウは対象にしない。
+VS Code は、開いていても毎回新しいウィンドウを開く。
+スクリプトを管理者で動かしていても、アプリは通常権限で起動する（通常権限で動いているエクスプローラーに起動してもらう）。
 
 ### Win+L（ロック）
 

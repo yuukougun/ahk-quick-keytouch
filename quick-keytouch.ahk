@@ -19,9 +19,11 @@ numpadMode := false
 
 ;機能メニュー（無変換 + CapsLock）
 FuncMenu := Menu()
-FuncMenu.Add("&a メモ帳", (*) => ActivateOrRun("ahk_exe Notepad.exe", "Microsoft.WindowsNotepad_8wekyb3d8bbwe!App"))
-FuncMenu.Add("&s 電卓", (*) => ActivateOrRun("電卓 ahk_class ApplicationFrameWindow", "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"))
-FuncMenu.Add("&d ターミナル", (*) => ActivateOrRun("ahk_exe WindowsTerminal.exe", "Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"))
+FuncMenu.Add("&a メモ帳", (*) => ActivateOrRun("ahk_exe Notepad.exe", "shell:AppsFolder\Microsoft.WindowsNotepad_8wekyb3d8bbwe!App"))
+FuncMenu.Add("&s 電卓", (*) => ActivateOrRun("電卓 ahk_class ApplicationFrameWindow", "shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"))
+;Windows Terminal の「コマンド プロンプト」プロファイル（cmd）で開く。タブとウィンドウのタイトルがプロファイル名になる
+FuncMenu.Add("&d ターミナル（cmd）", (*) => ActivateOrRun("コマンド プロンプト ahk_exe WindowsTerminal.exe", "wt.exe", "-p {0caa0dad-35be-5f56-a8ff-afceeeaa6101}"))
+FuncMenu.Add("&v VS Code（新しいウィンドウ）", OpenVSCodeWindow)
 FuncMenu.Add()
 FuncMenu.Add("&f ショートカット一覧", ShowShortcutList)
 
@@ -111,6 +113,7 @@ vk1D & l::ArrowKey("{Right}")
 vk1D & i::ArrowKey("{Up}")
 vk1D & k::ArrowKey("{Down}")
 
+;Alt + 矢印（VS Code の行移動、ブラウザーの戻る・進むなど）
 !i::Send("!{Up}")
 !+i::Send("!+{Up}")
 !^i::Send("!^{Up}")
@@ -118,6 +121,14 @@ vk1D & k::ArrowKey("{Down}")
 !k::Send("!{Down}")
 !+k::Send("!+{Down}")
 !^k::Send("!^{Down}")
+
+!j::Send("!{Left}")
+!+j::Send("!+{Left}")
+!^j::Send("!^{Left}")
+
+!l::Send("!{Right}")
+!+l::Send("!+{Right}")
+!^l::Send("!^{Right}")
 
 ArrowKey(key) {
     if (GetKeyState("LWin", "P") or GetKeyState("RWin", "P")) {
@@ -141,6 +152,10 @@ SendKeys(keys, *) {
 ;<+>+ は左右両方の Shift が押されているときだけ反応する。#HotIf を使わないので a, d を打つたびの問い合わせが起きない
 *<+>+a::Send("{Shift Up}#^{Left}")
 *<+>+d::Send("{Shift Up}#^{Right}")
+
+;Alt+Tab（無変換を押したまま Tab を押すたびに次のウィンドウへ進み、無変換を離すと切り替わる）
+;AltTab はフックの中で処理される組み込みの動作で、無変換を離したときに Alt も離してくれる
+vk1D & Tab::AltTab
 
 ;実行
 vk1D & h::SendWithShiftCtrl("{F5}")
@@ -172,9 +187,6 @@ vk1D & y::Send("^y")
 
 ;検索
 vk1D & f::Send("^f")
-
-;タブ・ファイルを閉じる
-vk1D & w::Send("^w")
 
 ;半角全角切り替え
 vk1D & o::Send("{vkF3sc029}")
@@ -249,14 +261,42 @@ vk1D & vkF0:: {
 }
 
 ;開いていれば前面に出し、なければ起動する
-;スクリプトを管理者で動かしていると、そのまま Run したアプリも管理者になるので、
-;エクスプローラー経由で起動して通常権限で開く
-ActivateOrRun(winTitle, appId) {
+ActivateOrRun(winTitle, target, args := "") {
     if WinExist(winTitle) {
         WinActivate()
         return
     }
-    Run("explorer.exe shell:AppsFolder\" appId)
+    RunAsUser(target, args)
+}
+
+;VS Code は開いていても毎回新しいウィンドウを開く
+OpenVSCodeWindow(*) {
+    for dir in [EnvGet("LOCALAPPDATA") "\Programs\Microsoft VS Code", A_ProgramFiles "\Microsoft VS Code"] {
+        if FileExist(dir "\Code.exe") {
+            RunAsUser(dir "\Code.exe", "--new-window")
+            return
+        }
+    }
+    MsgBox("VS Code（Code.exe）が見つかりませんでした。")
+}
+
+;スクリプトを管理者で動かしていると、そのまま Run したアプリも管理者になるので、
+;通常権限で動いているエクスプローラー（タスクバーやデスクトップ）に頼んで起動してもらう。
+;Run("explorer.exe ...") と違って、起動するアプリに引数も渡せる
+RunAsUser(target, args := "") {
+    try {
+        ;デスクトップのウィンドウから、エクスプローラーの中で動いている Shell.Application を取り出す
+        desktop := ComObject("Shell.Application").Windows.FindWindowSW(0, 0, 8, 0, 1) ;SWC_DESKTOP, SWFO_NEEDDISPATCH
+        browser := ComObjQuery(desktop, "{4C96BE40-915C-11CF-99D3-00AA004AE837}", "{000214E2-0000-0000-C000-000000000046}") ;SID_STopLevelBrowser, IID_IShellBrowser
+        ComCall(15, browser, "Ptr*", &pView := 0) ;IShellBrowser::QueryActiveShellView
+        view := ComValue(13, pView)
+        IID_IDispatch := Buffer(16)
+        NumPut("Int64", 0x20400, "Int64", 0x46000000000000C0, IID_IDispatch)
+        ComCall(15, view, "UInt", 0, "Ptr", IID_IDispatch, "Ptr*", &pDisp := 0) ;IShellView::GetItemObject(SVGIO_BACKGROUND)
+        ComValue(9, pDisp).Application.ShellExecute(target, args)
+    } catch as e {
+        MsgBox("起動できませんでした: " target "`n" e.Message)
+    }
 }
 
 ;README.md の「操作方法」にある表を一覧にして表示する
