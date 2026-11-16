@@ -30,8 +30,10 @@ function Test-IsAdmin {
 function Get-AhkExe {
     $dir = (Get-ItemProperty 'HKLM:\SOFTWARE\AutoHotkey' -ErrorAction SilentlyContinue).InstallDir
     if (-not $dir) { $dir = Join-Path $env:ProgramFiles 'AutoHotkey' }
-    $exe = Join-Path $dir 'AutoHotkey.exe'
-    if (-not (Test-Path $exe)) { throw "AutoHotkey.exe が見つかりません: $exe" }
+    # v2 のインストーラーは本体を v2 フォルダに置く
+    $name = if ([Environment]::Is64BitOperatingSystem) { 'AutoHotkey64.exe' } else { 'AutoHotkey32.exe' }
+    $exe = Join-Path $dir "v2\$name"
+    if (-not (Test-Path $exe)) { throw "AutoHotkey v2 が見つかりません: $exe" }
     $exe
 }
 
